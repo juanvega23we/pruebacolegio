@@ -1,46 +1,29 @@
-services:
+name: Django CI
 
-  db:
-    image: mysql:8.0
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    volumes:
-      - db_data:/var/lib/mysql
-    ports:
-      - "3315:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+on:
+  push:
+    branches:
+      - main
 
-  web:
-    build: .
-    env_file: .env
-    volumes:
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    ports:
-      - "8015:8000"
-    depends_on:
-      db:
-        condition: service_healthy
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  phpmyadmin:
-    image: phpmyadmin:latest
-    restart: unless-stopped
-    environment:
-      PMA_HOST: db
-    ports:
-      - "8030:80"
-    depends_on:
-      - db
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
 
-volumes:
-  db_data:
-  static_volume:
-  media_volume:
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ProyectoColegio/requirements.txt
+
+      - name: Ejecutar pruebas
+        run: |
+          cd ProyectoColegio
+          python manage.py check
