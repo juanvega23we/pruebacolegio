@@ -42,4 +42,4 @@ EXPOSE 10000
 
 # Ejecutamos Gunicorn
 # Hemos añadido --chdir /app para asegurar que Gunicorn busque en el lugar correcto
-CMD ["gunicorn", "--chdir", "/app", "config.wsgi:application", "--bind", "0.0.0.0:10000"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --chdir /app config.wsgi:application --bind 0.0.0.0:10000"]
