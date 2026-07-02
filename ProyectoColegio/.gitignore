@@ -1,0 +1,30 @@
+# Entorno virtual
+.venv/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de log
+*.log
+
+# Archivos de base de datos SQLite
+*.sqlite3
+
+# Archivos de migraciones de Django (opcional ignorarlos si los generas en equipo)
+# Puedes dejar estos si deseas compartir las migraciones
+**/migrations/*.py
+**/migrations/__pycache__/
+
+# Archivos de configuración de IDE
+.vscode/
+.idea/
+**/.env
+**/token.json
+**/credentials.json
+**/media/usuarios/*
+**/*.md
+**/img/**
+docker-compose.yml
+prompt_sistema.txt
