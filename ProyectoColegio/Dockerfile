@@ -1,11 +1,15 @@
+# Usamos una imagen base ligera
 FROM python:3.11-slim
 
+# Evita que Python genere archivos .pyc y permite ver logs en tiempo real
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
-# 1. Ya estamos en el Root Directory (ProyectoColegio), así que el WORKDIR es simplemente /app
+# Establecemos el directorio de trabajo
 WORKDIR /app
 
+# Instalamos dependencias del sistema necesarias para librerías como Cairo (para PDF/imágenes)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     pkg-config \
@@ -14,26 +18,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2-dev \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
-    libgdk-pixbuf-xlib-2.0-0 \
+    libgdk-pixbuf-2.0-0 \
     libffi-dev \
     shared-mime-info \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Como requirements.txt ahora está en la misma carpeta que el Dockerfile, se copia directo
+# Instalamos dependencias de Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# 3. Copiamos todo el contenido de la carpeta actual al WORKDIR (/app)
+# Copiamos todo el proyecto al contenedor
 COPY . .
 
-# 4. Permisos
-RUN adduser --disabled-password --gecos "" appuser \
-    && chown -R appuser:appuser /app
+# Creamos un usuario no root para mayor seguridad
+RUN adduser --disabled-password --gecos "" appuser && \
+    chown -R appuser:appuser /app
     
 USER appuser
 
-# 5. Render usa puertos distintos internamente. 
-# Si usas Gunicorn (que es lo ideal en producción), el puerto suele ser 10000.
+# Exponemos el puerto que Render asigna automáticamente
 EXPOSE 10000
-ENV PYTHONPATH=/app:$PYTHONPATH
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:10000"]
+
+# Ejecutamos Gunicorn
+# Hemos añadido --chdir /app para asegurar que Gunicorn busque en el lugar correcto
+CMD ["gunicorn", "--chdir", "/app", "config.wsgi:application", "--bind", "0.0.0.0:10000"]
