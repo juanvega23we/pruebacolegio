@@ -35,4 +35,5 @@ USER appuser
 # 5. Render usa puertos distintos internamente. 
 # Si usas Gunicorn (que es lo ideal en producción), el puerto suele ser 10000.
 EXPOSE 10000
+ENV PYTHONPATH=/app:$PYTHONPATH
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:10000"]
