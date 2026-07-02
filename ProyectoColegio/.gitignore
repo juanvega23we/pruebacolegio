@@ -20,6 +20,5 @@ __pycache__/
 **/credentials.json
 **/media/usuarios/*
 **/*.md
-**/img/**
 docker-compose.yml
 prompt_sistema.txt
