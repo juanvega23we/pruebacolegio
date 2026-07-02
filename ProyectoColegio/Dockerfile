@@ -31,6 +31,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copiamos todo el proyecto al contenedor
 COPY . .
 
+# Recolectamos los archivos estáticos (genera el manifiesto que necesita WhiteNoise)
+RUN python manage.py collectstatic --noinput
+
 # Creamos un usuario no root para mayor seguridad
 RUN adduser --disabled-password --gecos "" appuser && \
     chown -R appuser:appuser /app
@@ -41,5 +44,4 @@ USER appuser
 EXPOSE 10000
 
 # Ejecutamos Gunicorn
-# Hemos añadido --chdir /app para asegurar que Gunicorn busque en el lugar correcto
 CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --chdir /app config.wsgi:application --bind 0.0.0.0:10000"]
